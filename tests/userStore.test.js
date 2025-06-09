@@ -29,5 +29,6 @@ describe('user store', () => {
     store.user = { id: '1' }
     await store.signOut()
     expect(store.user).toBeNull()
+    expect(store.initialized).toBe(false)
   })
 })

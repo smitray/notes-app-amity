@@ -18,16 +18,26 @@
 import { ref } from 'vue'
 import { supabase } from '../supabase/client'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '../stores/user'
+import { useToastStore } from '../stores/toast'
 
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const router = useRouter()
+const userStore = useUserStore()
+const toast = useToastStore()
 
 const register = async () => {
   loading.value = true
   const { error } = await supabase.auth.signUp({ email: email.value, password: password.value })
   loading.value = false
-  if (!error) router.push('/notes')
+  if (error) {
+    toast.show('Registration failed')
+  } else {
+    await userStore.fetchUser()
+    toast.show('Registered')
+    router.push('/notes')
+  }
 }
 </script>

@@ -14,6 +14,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { supabase } from '../supabase/client'
 import { useUserStore } from '../stores/user'
+import { useToastStore } from '../stores/toast'
 import Editor from '../components/Editor.vue'
 
 const router = useRouter()
@@ -24,6 +25,7 @@ const content = ref('')
 const saving = ref(false)
 const isNew = computed(() => id === 'new')
 const userStore = useUserStore()
+const toast = useToastStore()
 
 const load = async () => {
   if (isNew.value) return
@@ -36,11 +38,14 @@ const save = async () => {
   saving.value = true
   const payload = { title: title.value, content: content.value }
   if (isNew.value) {
-    await supabase.from('notes').insert({ ...payload, user_id: userStore.user.id })
+    const { error } = await supabase.from('notes').insert({ ...payload, user_id: userStore.user.id })
+    if (error) toast.show('Failed to save')
   } else {
-    await supabase.from('notes').update(payload).eq('id', id)
+    const { error } = await supabase.from('notes').update(payload).eq('id', id)
+    if (error) toast.show('Failed to save')
   }
   saving.value = false
+  toast.show('Saved')
   router.push('/notes')
 }
 

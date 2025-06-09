@@ -26,6 +26,8 @@ pnpm run dev
 4. Run unit tests
 
 ```bash
+To run the integration tests that hit Supabase, set `VITE_SUPABASE_URL` and `VITE_SUPABASE_KEY` in your environment.
+
 pnpm run test
 ```
 

@@ -10,7 +10,14 @@
     <div v-if="loading" class="text-center">Loading...</div>
     <div v-else-if="notes.length === 0" class="text-center text-gray-500">No notes yet</div>
     <div class="grid gap-4" v-else>
-      <NoteCard v-for="n in notes" :key="n.id" :title="n.title" :date="formatDate(n.updated_at)" @open="openNote(n.id)" />
+      <NoteCard
+        v-for="n in notes"
+        :key="n.id"
+        :title="n.title"
+        :date="formatDate(n.updated_at)"
+        @open="openNote(n.id)"
+        @delete="deleteNote(n.id)"
+      />
     </div>
   </div>
 </template>
@@ -21,9 +28,11 @@ import { supabase } from '../supabase/client'
 import { useRouter } from 'vue-router'
 import NoteCard from '../components/NoteCard.vue'
 import { useUserStore } from '../stores/user'
+import { useToastStore } from '../stores/toast'
 
 const router = useRouter()
 const userStore = useUserStore()
+const toast = useToastStore()
 const notes = ref([])
 const loading = ref(true)
 
@@ -37,6 +46,15 @@ const loadNotes = async () => {
 const newNote = () => router.push('/notes/new')
 const openNote = id => router.push(`/notes/${id}`)
 const formatDate = d => new Date(d).toLocaleString()
+const deleteNote = async id => {
+  const { error } = await supabase.from('notes').delete().eq('id', id)
+  if (!error) {
+    toast.show('Deleted')
+    loadNotes()
+  } else {
+    toast.show('Failed to delete')
+  }
+}
 const signOut = async () => {
   await userStore.signOut()
   router.push('/login')

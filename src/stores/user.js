@@ -12,6 +12,7 @@ export const useUserStore = defineStore('user', {
     async signOut() {
       await supabase.auth.signOut()
       this.user = null
+      this.initialized = false
     }
   }
 })
